@@ -75,66 +75,72 @@ int main(int argc, char ** argv) {
     cout << "Receive incomplete info.\n";
     return EXIT_FAILURE;
   }
-  cout << "Neighbor : Hostname - " << right_neighbor.hostname << " Port - "
-       << right_neighbor.port << endl;
 
   //Connect right neighbor
   char right_neighbor_port[10];
   sprintf(right_neighbor_port, "%d", right_neighbor.port);
   right_neighbor.fd = connectMaster(right_neighbor.hostname, right_neighbor_port);
+  cout << "Connect to Right - Neighbor : Hostname - " << right_neighbor.hostname
+       << " Port - " << right_neighbor.port << endl;
   //Accept left neighbor
   Player left_neighbor;
   string left_hostname;
-  master->acceptConnection(left_fd, left_neighbor.fd, left_hostname);
+  left_neighbor.port = master->acceptConnection(left_fd, left_neighbor.fd, left_hostname);
   strcpy(left_neighbor.hostname, left_hostname.c_str());
+  cout << "Accept: Left- Neighbor : Hostname - " << left_neighbor.hostname << " Port - "
+       << left_neighbor.port << endl;
 
-  fd_set rfds;
-  FD_ZERO(&rfds);
   int fds[] = {right_neighbor.fd, left_neighbor.fd, master_fd};
-  FD_SET(master_fd, &rfds);
-  FD_SET(right_neighbor.fd, &rfds);
-  FD_SET(left_neighbor.fd, &rfds);
-  // Listen 'it' to return.
-  int nfd =
-      (right_neighbor.fd > left_neighbor.fd ? right_neighbor.fd : left_neighbor.fd) + 1;
-  if (select(nfd, &rfds, NULL, NULL, NULL) == -1) {
-    cerr << "Select: \n";
-    return EXIT_FAILURE;
-  }
-  Potato potato;
-  srand((unsigned int)time(NULL) + player_id);
-  for (size_t i = 0; i < 3; ++i) {
-    if (FD_ISSET(fds[i], &rfds)) {
-      // Receives the potato
-      if (sizeof(Potato) != recv(fds[i], &potato, sizeof(Potato), MSG_WAITALL)) {
-        cerr << "Fail to receive potato" << endl;
-        return EXIT_FAILURE;
+  while (1) {
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    FD_SET(master_fd, &rfds);
+    FD_SET(right_neighbor.fd, &rfds);
+    FD_SET(left_neighbor.fd, &rfds);
+    // Listen 'it' to return.
+    int nfd =
+        (right_neighbor.fd > left_neighbor.fd ? right_neighbor.fd : left_neighbor.fd) + 1;
+    if (select(nfd, &rfds, NULL, NULL, NULL) == -1) {
+      cerr << "Select: \n";
+      return EXIT_FAILURE;
+    }
+    Potato potato;
+    srand((unsigned int)time(NULL) + player_id);
+    for (size_t i = 0; i < 3; ++i) {
+      if (FD_ISSET(fds[i], &rfds)) {
+        // Receives the potato
+        if (sizeof(Potato) != recv(fds[i], &potato, sizeof(Potato), MSG_WAITALL)) {
+          cerr << "Fail to receive potato" << endl;
+          return EXIT_FAILURE;
+        }
       }
+    }
+    if (potato.num_hops == 0) {
+      // End game.
+      break;
+    }
+    else {
+      // # hops --
+      potato.num_hops--;
+      potato.trace[potato.idx_hop++] = player_id;
       if (potato.num_hops == 0) {
-        // End game.
-        break;
+        if (sizeof(Potato) != send(master_fd, &potato, sizeof(Potato), 0)) {
+          cerr << "Fail to send potato back to ringmaster\n";
+          break;
+        }
+        cout << "I’ it\n";
       }
       else {
-        // # hops --
-        potato.num_hops--;
-        if (potato.num_hops == 0) {
-          if (sizeof(Potato) != send(master_fd, &potato, sizeof(Potato), 0)) {
-            cerr << "Fail to send potato back to ringmaster\n";
-            break;
-          }
-          cout << "I’m t\n";
-        }
-        else {
-          int next = rand() % 2;
-          int next_idx = (next == 0) ? (player_id + 1) % num_players
-                                     : (player_id - 1 + num_players) % num_players;
-          cout << "Sending potato to " << next_idx << endl;
-          if (sizeof(Potato) != send(fds[next_idx], &potato, sizeof(Potato), 0)) {
-            cerr << "Fail to send potato back to next player\n";
-            break;
-          }
+        int next = rand() % 2;
+        int next_idx = (next == 0) ? (player_id + 1) % num_players
+                                   : (player_id - 1 + num_players) % num_players;
+        cout << "Sending potato to " << next_idx << endl;
+        if (sizeof(Potato) != send(fds[next_idx], &potato, sizeof(Potato), 0)) {
+          cerr << "Fail to send potato back to next player\n";
+          break;
         }
       }
+      continue;
     }
   }
   sleep(1);

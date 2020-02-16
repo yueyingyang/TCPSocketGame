@@ -39,6 +39,8 @@ int main(int argc, char ** argv) {
     string player_hostname;
     int player_fd;
     master->acceptConnection(listen_fd, player_fd, player_hostname);
+    cout << "Player " << i << " fd: " << player_fd << " Hostname: " << player_hostname
+         << endl;
     players.push_back(Player(player_fd, player_hostname));
     recv(players[i].fd, &players[i].port, sizeof(players[i].port), 0);
     send(players[i].fd, &i, sizeof(i), 0);
@@ -47,7 +49,7 @@ int main(int argc, char ** argv) {
   }
 
   for (vector<Player>::iterator it = players.begin(); it != players.end(); ++it) {
-    cout << "Player : Hostname - " << it->hostname << " Port - " << it->port;
+    cout << "Player : Hostname - " << it->hostname << " Port - " << it->port << endl;
   }
   // Send neighbors' info to each player.
   for (int i = 0; i < num_players; ++i) {

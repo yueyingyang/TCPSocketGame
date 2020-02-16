@@ -51,7 +51,7 @@ class TCPServer {
  public:
   ~TCPServer() { freeaddrinfo(host_info_list); }
   int startListen(const char * port, const char * hostname);
-  void acceptConnection(int socket_fd, int & player_fd, string & play\
+  int acceptConnection(int socket_fd, int & player_fd, string & play\
 er_hostname);
 };
 
@@ -64,9 +64,9 @@ void * get_in_addr(struct sockaddr * sa) {
   return &(((struct sockaddr_in6 *)sa)->sin6_addr);
 }
 
-void TCPServer::acceptConnection(int socket_fd,
-                                 int & player_fd,
-                                 string & player_hostname) {
+int TCPServer::acceptConnection(int socket_fd,
+                                int & player_fd,
+                                string & player_hostname) {
   struct sockaddr_storage socket_addr;
   socklen_t socket_addr_len = sizeof(socket_addr);
   int client_connection_fd;
@@ -76,13 +76,15 @@ void TCPServer::acceptConnection(int socket_fd,
     cerr << "Error: cannot accept connection on socket" << endl;
     exit(EXIT_FAILURE);
   }  //if
-  char hostname[INET6_ADDRSTRLEN];
+  /*  char hostname[INET6_ADDRSTRLEN];
   inet_ntop(socket_addr.ss_family,
             get_in_addr((struct sockaddr *)&socket_addr),
             hostname,
-            sizeof(hostname));
-  player_hostname = string(hostname);
+            sizeof(hostname));*/
+  struct sockaddr_in * temp = (struct sockaddr_in *)&socket_addr;
+  player_hostname = inet_ntoa(temp->sin_addr);
   player_fd = client_connection_fd;
+  return ntohs(temp->sin_port);
 }
 
 int TCPServer::startListen(const char * port = "", const char * hostname = NULL) {
@@ -114,7 +116,7 @@ int TCPServer::startListen(const char * port = "", const char * hostname = NULL)
   int yes = 1;
   status = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
-  if (port == NULL) {
+  if (strcmp(port, "") == 0) {
     ((struct sockaddr_in *)host_info_list->ai_addr)->sin_port = 0;
   }
 
