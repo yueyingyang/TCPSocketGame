@@ -90,13 +90,14 @@ int main(int argc, char ** argv) {
   cout << "Accept: Left- Neighbor : Hostname - " << left_neighbor.hostname << " Port - "
        << left_neighbor.port << endl;
 
-  int fds[] = {right_neighbor.fd, left_neighbor.fd, master_fd};
+  int fds[] = {left_neighbor.fd, right_neighbor.fd, master_fd};
+
   while (1) {
     fd_set rfds;
     FD_ZERO(&rfds);
-    FD_SET(master_fd, &rfds);
-    FD_SET(right_neighbor.fd, &rfds);
-    FD_SET(left_neighbor.fd, &rfds);
+    for (size_t i = 0; i < 3; ++i) {
+      FD_SET(fds[i], &rfds);
+    }
     // Listen 'it' to return.
     int nfd =
         (right_neighbor.fd > left_neighbor.fd ? right_neighbor.fd : left_neighbor.fd) + 1;
@@ -115,6 +116,7 @@ int main(int argc, char ** argv) {
         }
       }
     }
+
     if (potato.num_hops == 0) {
       // End game.
       break;
@@ -132,7 +134,7 @@ int main(int argc, char ** argv) {
       }
       else {
         int next = rand() % 2;
-        int next_idx = (next == 0) ? (player_id + 1) % num_players
+        int next_idx = (next == 1) ? (player_id + 1) % num_players
                                    : (player_id - 1 + num_players) % num_players;
         cout << "Sending potato to " << next_idx << endl;
         if (sizeof(Potato) != send(fds[next_idx], &potato, sizeof(Potato), 0)) {
@@ -140,9 +142,9 @@ int main(int argc, char ** argv) {
           break;
         }
       }
-      continue;
     }
   }
+
   sleep(1);
   for (size_t i = 0; i < 3; ++i) {
     close(fds[i]);
