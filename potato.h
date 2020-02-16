@@ -36,7 +36,9 @@ class Player {
   int fd;
   int port;
   char hostname[INET6_ADDRSTRLEN];
-  Player() {}
+  Player() {
+    memset(this->hostname, 0, sizeof(this->hostname));
+  }
   Player(int fd, string hostname) : fd(fd) {
     memset(this->hostname, 0, sizeof(this->hostname));
     strcpy(this->hostname, hostname.c_str());

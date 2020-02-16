@@ -72,7 +72,7 @@ int main(int argc, char ** argv) {
   if (sizeof(Player) !=
       (temp = recv(master_fd, &right_neighbor, sizeof(Player), MSG_WAITALL))) {
     cout << "Receive size -" << temp << endl;
-    cout << "Receive incomplete info.\n";
+    cout << "Receive incomplete neighbor info.\n";
     return EXIT_FAILURE;
   }
 
@@ -80,8 +80,8 @@ int main(int argc, char ** argv) {
   char right_neighbor_port[10];
   sprintf(right_neighbor_port, "%d", right_neighbor.port);
   right_neighbor.fd = connectMaster(right_neighbor.hostname, right_neighbor_port);
-  cout << "Connect to Right - Neighbor : Hostname - " << right_neighbor.hostname
-       << " Port - " << right_neighbor.port << endl;
+  cout << "Connect to Right - Neighbor : fd :" << right_neighbor.fd <<" Hostname - " << right_neighbor.hostname
+       << " Port - " << right_neighbor_port << endl;
   //Accept left neighbor
   Player left_neighbor;
   string left_hostname;
@@ -113,6 +113,7 @@ int main(int argc, char ** argv) {
           cerr << "Fail to receive potato" << endl;
           return EXIT_FAILURE;
         }
+        break;
       }
     }
     if (potato.num_hops == 0) {
