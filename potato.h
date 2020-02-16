@@ -23,7 +23,7 @@ class Potato {
     cout << "Trace of potato:\n";
     for (int i = 0; i < idx_hop; i++) {
       cout << trace[i];
-      if (i != num_hops - 1) {
+      if (i != idx_hop - 1) {
         cout << ", ";
       }
     }

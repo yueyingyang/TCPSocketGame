@@ -75,13 +75,13 @@ int main(int argc, char ** argv) {
     cout << "Receive incomplete neighbor info.\n";
     return EXIT_FAILURE;
   }
-
   //Connect right neighbor
   char right_neighbor_port[10];
   sprintf(right_neighbor_port, "%d", right_neighbor.port);
   right_neighbor.fd = connectMaster(right_neighbor.hostname, right_neighbor_port);
   cout << "Connect to Right - Neighbor : fd :" << right_neighbor.fd <<" Hostname - " << right_neighbor.hostname
        << " Port - " << right_neighbor_port << endl;
+
   //Accept left neighbor
   Player left_neighbor;
   string left_hostname;
@@ -135,10 +135,10 @@ int main(int argc, char ** argv) {
       }
       else {
         int next = rand() % 2;
-        int next_idx = (next == 1) ? (player_id + 1) % num_players
+        int next_idx = next == 1 ? (player_id + 1) % num_players
                                    : (player_id - 1 + num_players) % num_players;
         cout << "Sending potato to " << next_idx << endl;
-        if (sizeof(Potato) != send(fds[next_idx], &potato, sizeof(Potato), 0)) {
+        if (sizeof(Potato) != send(fds[next], &potato, sizeof(Potato), 0)) {
           cerr << "Fail to send potato back to next player\n";
           break;
         }
