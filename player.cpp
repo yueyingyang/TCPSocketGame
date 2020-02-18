@@ -29,7 +29,8 @@ int connectMaster(const char * hostname, const char * port) {
   }  //if
 
   cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
-
+  char buf[1024];
+  read(socket_fd,buf,sizeof(buf)-1);
   status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1) {
     cerr << "Error: cannot connect to socket" << endl;
@@ -91,7 +92,10 @@ int main(int argc, char ** argv) {
        << left_neighbor.port << endl;
 
   int fds[] = {left_neighbor.fd, right_neighbor.fd, master_fd};
-
+  for (size_t i = 0; i < 3; ++i) {
+    
+  }
+    srand((unsigned int)time(NULL) + player_id);
   while (1) {
     fd_set rfds;
     FD_ZERO(&rfds);
@@ -106,7 +110,6 @@ int main(int argc, char ** argv) {
       return EXIT_FAILURE;
     }
     Potato potato;
-    srand((unsigned int)time(NULL) + player_id);
     for (size_t i = 0; i < 3; ++i) {
       if (FD_ISSET(fds[i], &rfds)) {
         // Receives the potato
@@ -135,8 +138,8 @@ int main(int argc, char ** argv) {
       }
       else {
         int next = rand() % 2;
-        int next_idx = next == 1 ? (player_id + 1) % num_players
-                                   : (player_id - 1 + num_players) % num_players;
+        int next_idx = next == 1 ? ((player_id + 1) % num_players)
+          : ((player_id - 1 + num_players) % num_players);
         cout << "Sending potato to " << next_idx << endl;
         if (sizeof(Potato) != send(fds[next], &potato, sizeof(Potato), 0)) {
           cerr << "Fail to send potato back to next player\n";
