@@ -134,6 +134,5 @@ int TCPServer::startListen(const char * port = "", const char * hostname = NULL)
     cerr << "  (" << hostname << "," << port << ")" << endl;
     return -1;
   }  //if
-  cout << "Waiting for connection on port " << port << endl;
   return socket_fd;
 }
