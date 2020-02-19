@@ -28,7 +28,6 @@ int connectMaster(const char * hostname, const char * port) {
     return -1;
   }  //if
 
-  cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
   char buf[1024];
   read(socket_fd,buf,sizeof(buf)-1);
   status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
@@ -80,16 +79,12 @@ int main(int argc, char ** argv) {
   char right_neighbor_port[10];
   sprintf(right_neighbor_port, "%d", right_neighbor.port);
   right_neighbor.fd = connectMaster(right_neighbor.hostname, right_neighbor_port);
-  cout << "Connect to Right - Neighbor : fd :" << right_neighbor.fd <<" Hostname - " << right_neighbor.hostname
-       << " Port - " << right_neighbor_port << endl;
 
   //Accept left neighbor
   Player left_neighbor;
   string left_hostname;
   left_neighbor.port = master->acceptConnection(left_fd, left_neighbor.fd, left_hostname);
   strcpy(left_neighbor.hostname, left_hostname.c_str());
-  cout << "Accept: Left- Neighbor : Hostname - " << left_neighbor.hostname << " Port - "
-       << left_neighbor.port << endl;
 
   int fds[] = {left_neighbor.fd, right_neighbor.fd, master_fd};
   for (size_t i = 0; i < 3; ++i) {
