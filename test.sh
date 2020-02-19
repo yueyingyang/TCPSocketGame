@@ -1,3 +1,3 @@
 make clean
 make
-./ringmaster 4444 3 512
+./ringmaster 4444 5 512

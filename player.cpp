@@ -95,7 +95,7 @@ int main(int argc, char ** argv) {
   for (size_t i = 0; i < 3; ++i) {
     
   }
-    srand((unsigned int)time(NULL) + player_id);
+  srand((unsigned int)time(NULL) + player_id);
   while (1) {
     fd_set rfds;
     FD_ZERO(&rfds);
@@ -153,5 +153,6 @@ int main(int argc, char ** argv) {
   for (size_t i = 0; i < 3; ++i) {
     close(fds[i]);
   }
+  delete(master);
   return EXIT_SUCCESS;
 }

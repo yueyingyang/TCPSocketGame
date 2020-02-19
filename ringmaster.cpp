@@ -19,9 +19,9 @@ int main(int argc, char ** argv) {
   int num_players = atoi(argv[2]);
   int num_hops = atoi(argv[3]);
   // Validate command line argument
-  // num_players >= 1, num_hops [0, 512]
-  if (num_players < 1 || num_hops < 0 || num_hops > 512) {
-    cerr << "Usage: num_players >= 1, num_hops [0, 512].\n";
+  // num_players > 1, num_hops [0, 512]
+  if (num_players < 2 || num_hops < 0 || num_hops > 512) {
+    cerr << "Usage: num_players > 1, num_hops [0, 512].\n";
     return EXIT_FAILURE;
   }
 
@@ -97,11 +97,12 @@ int main(int argc, char ** argv) {
       break;
     }
   }
-  potato.print_trace();
   endGame(potato, players);
+  potato.print_trace();
   delete master;
-  //  close(listen_fd);
-  /*for (int i = 0; i < num_players - 1; ++i) {
+  sleep(1);
+  close(listen_fd);
+  for (int i = 0; i < num_players - 1; ++i) {
     close(players[i].fd);
-  }*/
+  }
 }
