@@ -9,4 +9,4 @@ player: player.cpp potato.h
 	$(CC) $(CPPFLAGS) -o $@ player.cpp
 .PHONY: clean depend
 clean:
-	rm -f $(TARGET) *.o *.cpp~ *.hpp~
+	rm -f $(TARGET) *.o *.cpp~ *.hpp~ *.sh~
